@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Formulario Multipágina</title>
+
+<style>
+    body {
+        font-family: Arial;
+        margin: 0;
+        background: #f0f0f0;
+    }
+
+    .contenedor {
+        width: 70%;
+        margin: 20px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .page {
+        display: none;
+    }
+
+    .page.active {
+        display: block;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input {
+        width: 97%;
+        padding: 8px;
+        margin: 5px 0 15px 0;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: rgb(33, 137, 255);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    button:hover {
+        background: rgb(20, 110, 210);
+    }
+
+    .lista {
+        background: #eee;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+
+<!--  PAGINA 1 -->
+<div class="page active" id="page1">
+    <h2>Datos Personales</h2>
+
+    <label>Nombre:</label>
+    <input type="text" id="nombre" required>
+
+    <label>Apellido:</label>
+    <input type="text" id="apellido" required>
+
+    <label>Edad:</label>
+    <input type="number" id="edad" required>
+
+    <button type="button" onclick="guardarDatosPersonales()">Siguiente</button>
+</div>
+
+
+
+<!--  PAGINA 2  -->
+<div class="page" id="page2">
+    <h2>Familiares</h2>
+
+    <label>Nombre:</label>
+    <input type="text" id="fam_nombre">
+
+    <label>Parentesco:</label>
+    <input type="text" id="fam_parentesco">
+
+    <label>Edad:</label>
+    <input type="number" id="fam_edad">
+
+    <button type="button" onclick="agregarFamiliar()">Agregar Familiar</button>
+    <button type="button" onclick="siguienteFamiliares()">Siguiente</button>
+    <button type="button" onclick="mostrarPagina(1)">Anterior</button>
+
+    <div class="lista" id="listaFamiliares"></div>
+</div>
+
+
+
+<!-- PAGINA 3 -->
+<div class="page" id="page3">
+    <h2>Condiciones Preexistentes</h2>
+
+    <label>Enfermedad:</label>
+    <input type="text" id="cond_enfermedad">
+
+    <label>Tiempo con la enfermedad (años):</label>
+    <input type="number" min="0" id="cond_tiempo">
+
+    <button type="button" onclick="agregarCondicion()">Agregar Condición</button>
+    <button type="button" onclick="siguienteCondiciones()">Siguiente</button>
+    <button type="button" onclick="mostrarPagina(2)">Anterior</button>
+
+    <div class="lista" id="listaCondiciones"></div>
+</div>
+
+
+
+<!--PAGINA 4  -->
+<div class="page" id="page4">
+    <h2>Internamientos Realizados</h2>
+
+    <label>Fecha:</label>
+    <input type="date" id="int_fecha">
+
+    <label>Centro Médico:</label>
+    <input type="text" id="int_centro">
+
+    <label>Diagnóstico:</label>
+    <input type="text" id="int_dx">
+
+    <button type="button" onclick="agregarInternamiento()">Agregar Internamiento</button>
+    <button type="button" onclick="finalizarFormulario()">Finalizar</button>
+    <button type="button" onclick="mostrarPagina(3)">Anterior</button>
+
+    <div class="lista" id="listaInternamientos"></div>
+</div>
+
+
+
+<!--PAGINA 5  -->
+<div class="page" id="page5">
+    <h2>Resumen Final</h2>
+
+    <h3>Datos Personales</h3>
+    <div id="res_personales"></div>
+
+    <h3>Familiares</h3>
+    <ul id="res_familiares"></ul>
+
+    <h3>Condiciones</h3>
+    <ul id="res_condiciones"></ul>
+
+    <h3>Internamientos</h3>
+    <ul id="res_internamientos"></ul>
+
+    <button type="button" onclick="reiniciarFormulario()">Empezar otro formulario</button>
+</div>
+
+</div> <!-- FIN CONTENEDOR -->
+
+
+<script>
+/*  VARIABLES */
+let datosPersonales = {};
+let familiares = [];
+let condiciones = [];
+let internamientos = [];
+
+/* CAMBIO DE PÁGINA */
+function mostrarPagina(n) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById("page" + n).classList.add("active");
+}
+
+/*  VALIDAR  */
+function validarPagina(pageId) {
+    let inputs = document.querySelectorAll(`#${pageId} input[required]`);
+    for (let i of inputs) {
+        if (i.value.trim() === "") {
+            alert("Debe completar todos los campos obligatorios.");
+            i.focus();
+            return false;
+        }
+    }
+    return true;
+}
+
+/* PÁGINA 1  */
+function guardarDatosPersonales() {
+    if (!validarPagina("page1")) return;
+
+    datosPersonales = {
+        nombre: document.getElementById("nombre").value,
+        apellido: document.getElementById("apellido").value,
+        edad: document.getElementById("edad").value
+    };
+
+    mostrarPagina(2);
+}
+
+/*  PÁGINA 2 */
+function agregarFamiliar() {
+    let nombre = document.getElementById("fam_nombre").value;
+    let parentesco = document.getElementById("fam_parentesco").value;
+    let edad = document.getElementById("fam_edad").value;
+
+    if (nombre === "" || parentesco === "" || edad === "") {
+        alert("Complete todos los datos del familiar.");
+        return;
+    }
+
+    familiares.push({ nombre, parentesco, edad });
+
+    document.getElementById("listaFamiliares").innerHTML += `
+        <p>${nombre} / ${parentesco} / ${edad}</p>
+    `;
+
+    document.getElementById("fam_nombre").value = "";
+    document.getElementById("fam_parentesco").value = "";
+    document.getElementById("fam_edad").value = "";
+}
+
+function siguienteFamiliares() {
+    if (familiares.length === 0) {
+        alert("Debe agregar al menos un familiar.");
+        return;
+    }
+    mostrarPagina(3);
+}
+
+/* PÁGINA 3 */
+function agregarCondicion() {
+    let enfermedad = document.getElementById("cond_enfermedad").value;
+    let tiempo = document.getElementById("cond_tiempo").value;
+
+    if (enfermedad === "" || tiempo === "") {
+        alert("Complete todos los campos.");
+        return;
+    }
+
+    condiciones.push({ enfermedad, tiempo });
+
+    document.getElementById("listaCondiciones").innerHTML += `
+        <p>${enfermedad} — ${tiempo} años</p>
+    `;
+
+    document.getElementById("cond_enfermedad").value = "";
+    document.getElementById("cond_tiempo").value = "";
+}
+
+function siguienteCondiciones() {
+    if (condiciones.length === 0) {
+        alert("Debe agregar al menos una condición.");
+        return;
+    }
+    mostrarPagina(4);
+}
+
+/* PÁGINA 4  */
+function agregarInternamiento() {
+    let fecha = document.getElementById("int_fecha").value;
+    let centro = document.getElementById("int_centro").value;
+    let dx = document.getElementById("int_dx").value;
+
+    if (fecha === "" || centro === "" || dx === "") {
+        alert("Complete todos los datos del internamiento.");
+        return;
+    }
+
+    internamientos.push({ fecha, centro, dx });
+
+    document.getElementById("listaInternamientos").innerHTML += `
+        <p>${fecha} — ${centro} — ${dx}</p>
+    `;
+
+    document.getElementById("int_fecha").value = "";
+    document.getElementById("int_centro").value = "";
+    document.getElementById("int_dx").value = "";
+    function siguienteInternamientos() {
+    if (internamientos.length === 0) {
+        alert("Debe agregar al menos un internamiento.");
+        return;
+    }
+    (mostrarResumen)
+    }
+    
+}
+
+/*  PÁGINA 5 */
+function finalizarFormulario() {
+    mostrarResumen();
+    mostrarPagina(5);
+}
+
+function mostrarResumen() {
+    document.getElementById("res_personales").innerHTML = `
+        <p><strong>Nombre:</strong> ${datosPersonales.nombre}</p>
+        <p><strong>Apellido:</strong> ${datosPersonales.apellido}</p>
+        <p><strong>Edad:</strong> ${datosPersonales.edad}</p>
+    `;
+
+    document.getElementById("res_familiares").innerHTML =
+        familiares.map(f => `<li>${f.nombre} / ${f.parentesco} / ${f.edad}</li>`).join("");
+
+    document.getElementById("res_condiciones").innerHTML =
+        condiciones.map(c => `<li>${c.enfermedad} — ${c.tiempo} años</li>`).join("");
+
+    document.getElementById("res_internamientos").innerHTML =
+        internamientos.map(i => `<li>${i.fecha} — ${i.centro} — ${i.dx}</li>`).join("");
+}
+
+/* REINICIAR  */
+function reiniciarFormulario() {
+    datosPersonales = {};
+    familiares = [];
+    condiciones = [];
+    internamientos = [];
+
+    document.querySelectorAll("input").forEach(i => i.value = "");
+
+    document.getElementById("listaFamiliares").innerHTML = "";
+    document.getElementById("listaCondiciones").innerHTML = "";
+    document.getElementById("listaInternamientos").innerHTML = "";
+
+    mostrarPagina(1);
+    alert("Formulario reiniciado.");
+}
+</script>
+
+</body>
+</html>
